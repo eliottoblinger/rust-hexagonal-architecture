@@ -1,11 +1,18 @@
 use std::{fs::{self, File}, io::Read};
 
+use dyn_clone::DynClone;
+
 use crate::domain::entities::poem::Poem;
 
-pub trait PoemsLoader {
+extern crate serde_json;
+
+pub trait PoemsLoader: DynClone {
     fn load_poems(&self) -> Vec<Poem>;
 }
 
+dyn_clone::clone_trait_object!(PoemsLoader);
+
+#[derive(Clone)]
 pub struct TPoemsLoader;
 
 impl PoemsLoader for TPoemsLoader {

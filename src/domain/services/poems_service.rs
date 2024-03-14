@@ -1,13 +1,17 @@
 use std::io;
+use dyn_clone::DynClone;
 
 use crate::domain::entities::poem::Poem;
 use crate::infrastructure::persistence::file_system::poems_in_file_system::PoemsInFileSystem; 
 
-pub trait PoemsService {
+pub trait PoemsService: DynClone {
     fn get_poems(&self) -> Vec<Poem>;
     fn read(&self, field: &str, value: &str) -> Result<Poem, io::Error>;
 }
 
+dyn_clone::clone_trait_object!(PoemsService);
+
+#[derive(Clone)]
 pub struct TPoemsService(pub Box<dyn PoemsInFileSystem>);
 
 impl PoemsService for TPoemsService {

@@ -21,6 +21,7 @@ fn get_test_poem() -> Poem {
     }
 }
 
+#[derive(Clone)]
 struct MockPoemsLoader();
 
 impl PoemsLoader for MockPoemsLoader {
@@ -94,8 +95,8 @@ fn test_get_by_author_id_with_correct_value() {
 
 #[test]
 fn test_get_by_author_id_with_wrong_value() {
-    let poems_service = TPoemsService(Box::from(TPoemsInFileSystem(Box::from(MockPoemsLoader()))));
-
+   
+ let poems_service = TPoemsService(Box::from(TPoemsInFileSystem(Box::from(MockPoemsLoader()))));
     let poem = poems_service.read("author_id", "author_id4");
 
     assert!(poem.is_err());

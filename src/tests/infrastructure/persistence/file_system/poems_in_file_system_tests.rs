@@ -1,5 +1,7 @@
 use std::io::ErrorKind;
 
+use dyn_clone::DynClone;
+
 use crate::{domain::entities::poem::Poem, infrastructure::persistence::file_system::{poems_in_file_system::{PoemsInFileSystem, TPoemsInFileSystem}, poems_loader::PoemsLoader}};
 
 fn get_test_poem() -> Poem {
@@ -20,6 +22,7 @@ fn get_test_poem() -> Poem {
     }
 }
 
+#[derive(Clone)]
 struct MockPoemsLoader();
 
 impl PoemsLoader for MockPoemsLoader {
