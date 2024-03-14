@@ -100,5 +100,13 @@ fn test_get_by_author_id_with_wrong_value() {
 
     assert!(poem.is_err());
     assert_eq!(poem.unwrap_err().kind(), ErrorKind::NotFound);
+}
 
+#[test]
+fn test_get_all() {
+    let poems_in_file_system = TPoemsInFileSystem(Box::from(MockPoemsLoader()));
+
+    let poems = poems_in_file_system.get_all();
+
+    assert_eq!(poems, MockPoemsLoader().load_poems());
 }
