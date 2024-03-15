@@ -5,7 +5,7 @@ use crate::{application::interfaces::single_action_controller::SingleActionContr
 pub struct TFindPoemById(pub Box<dyn PoemsService>);
 
 impl SingleActionController for TFindPoemById {
-    fn execute(&self, data: &dyn Any, handler: Option<&dyn Any>) -> Box<dyn Any> {
+    fn execute(&self, data: &dyn Any, _handler: Option<&dyn Any>) -> Box<dyn Any> {
         if let Some(id) = data.downcast_ref::<String>() {
             match self.0.read("id", id.as_str()) {
                 Ok(poem) => Box::new(poem),

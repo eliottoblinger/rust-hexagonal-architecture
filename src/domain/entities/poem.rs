@@ -7,3 +7,7 @@ pub struct Poem {
     pub stanzas: Vec<Vec<String>>,
     pub author_id: String
 }
+
+#[cfg(test)]
+#[path = "../../tests/domain/entities/poem_tests.rs"]
+mod console_app_tests;

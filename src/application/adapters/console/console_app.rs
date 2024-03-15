@@ -1,57 +1,52 @@
-use crate::{application::interfaces::single_action_controller::SingleActionController, domain::{entities::poem::Poem, services::poems_service::PoemsService}};
+use std::{any::Any, str::FromStr};
+
+use crate::{application::interfaces::single_action_controller::SingleActionController, common::logger::Logger, domain::{entities::poem::Poem, services::poems_service::PoemsService}};
 
 use super::{actions::{find_poem_by_author_id::TFindPoemByAuthorId, find_poem_by_id::TFindPoemById, find_poem_by_title::TFindPoemByTitle}, types::ArgName};
 
-use serde_json::to_string_pretty;
-
 pub trait ConsoleApp {
-    fn run(&self, args: Vec<String>) -> ();
+    fn run(&mut self, args: Vec<String>) -> ();
 }
 
-pub struct TConsoleApp(pub Box<dyn PoemsService>);
+pub struct TConsoleApp<'a> {
+    pub poems_service: Box<dyn PoemsService>,
+    pub logger: &'a mut dyn Logger,
+}
 
-impl ConsoleApp for TConsoleApp {
-    fn run(&self, args: Vec<String>) -> () {
+impl ConsoleApp for TConsoleApp<'_> {
+    fn run(&mut self, args: Vec<String>) -> () {
         if args.len() != 5 {
-            println!("Usage: {} --action <action> <arg_name> <arg>", args[0]);
+            self.logger.log(format!("Usage: {} --action <action> <arg_name> <arg>", args[0]));   
             return;
         }
 
-        let action = &args[2];
-        let arg_name = &args[3];
-        let arg = &args[4];
+        let input_action = &args[2];
+        let input_arg_name = &args[3];
+        let input_arg = &args[4];
     
-        if action != "read" {
-            println!("Unknown action: action {} doesn't exists", action);
+        if input_action != "read" {
+            self.logger.log(format!("Unknown action: action {} doesn't exists", input_action));
             return;
         }
 
-        let id_arg_name = ArgName::Id.as_str();
-        let title_arg_name = ArgName::Title.as_str();
-        let author_id_arg_name = ArgName::AuthorId.as_str();
+        let arg_name = ArgName::from_str(&input_arg_name);
 
-        if arg_name == author_id_arg_name {
-            let find_poem_by_author_id = TFindPoemByAuthorId(self.0.clone());
-            find_poem_by_author_id.execute(arg, None);
-            return;
-        }
-
-        if arg_name == title_arg_name {
-            let find_poem_by_title = TFindPoemByTitle(self.0.clone());
-            find_poem_by_title.execute(arg, None);
-            return;
-        }
-
-        if arg_name == id_arg_name {
-            let find_poem_by_id = TFindPoemById(self.0.clone());
-            let poem = find_poem_by_id.execute(arg, None) as Box<Poem>;
-
-            let serialized_poem = to_string_pretty(&poem).unwrap();
-
-            println!("{}", serialized_poem);
-            return;
+        match arg_name {
+            Ok(ArgName::Id)  => handle_poem_execution(TFindPoemById(self.poems_service.clone()).execute(input_arg, None), &input_action, &input_arg_name, &input_arg, self.logger),
+            Ok(ArgName::Title)  => handle_poem_execution(TFindPoemByTitle(self.poems_service.clone()).execute(input_arg, None), &input_action, &input_arg_name, &input_arg, self.logger),
+            Ok(ArgName::AuthorId ) => handle_poem_execution(TFindPoemByAuthorId(self.poems_service.clone()).execute(input_arg, None), &input_action, &input_arg_name, &input_arg, self.logger),
+            Err(_) => self.logger.log(format!("Unknown arg_name: arg_name {} doesn't exists", input_arg_name)),
         }
     }
+}
+
+fn handle_poem_execution(poem: Box<dyn Any>, input_action: &str, input_arg_name: &str, input_arg: &str, logger: &mut dyn Logger){
+    if let Ok(poem) = poem.downcast::<Poem>() {
+        logger.log(format!("{:?}", *poem));
+        return;
+    }
+
+    logger.log(format!("Error while executing action {} with arg_name {} and arg {}", input_action, input_arg_name, input_arg));
 }
 
 #[cfg(test)]
