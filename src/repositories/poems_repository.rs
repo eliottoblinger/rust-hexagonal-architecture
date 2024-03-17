@@ -6,16 +6,16 @@ use crate::domain::entities::poem::Poem;
 
 extern crate serde_json;
 
-pub trait PoemsLoader: DynClone {
+pub trait PoemsRepository: DynClone {
     fn load_poems(&self) -> Vec<Poem>;
 }
 
-dyn_clone::clone_trait_object!(PoemsLoader);
+dyn_clone::clone_trait_object!(PoemsRepository);
 
 #[derive(Clone)]
-pub struct TPoemsLoader;
+pub struct TPoemsRepository;
 
-impl PoemsLoader for TPoemsLoader {
+impl PoemsRepository for TPoemsRepository {
     fn load_poems(&self) -> Vec<Poem> {
         let paths = fs::read_dir("./data/poems").unwrap();
         let mut poems: Vec<Poem> = Vec::new();

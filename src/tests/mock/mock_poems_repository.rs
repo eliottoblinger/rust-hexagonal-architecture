@@ -1,11 +1,11 @@
-use crate::{domain::entities::poem::Poem, infrastructure::persistence::file_system::poems_loader::PoemsLoader};
+use crate::{domain::entities::poem::Poem, repositories::poems_repository::PoemsRepository};
 
 use super::mock_poem::mock_poem;
 
 #[derive(Clone)]
-pub struct MockPoemsLoader();
+pub struct MockPoemsRepository();
 
-impl PoemsLoader for MockPoemsLoader {
+impl PoemsRepository for MockPoemsRepository {
     fn load_poems(&self) -> Vec<Poem> {
         let poem1 =  Poem{
             id: "id".to_owned(), 

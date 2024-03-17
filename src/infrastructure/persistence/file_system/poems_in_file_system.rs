@@ -2,9 +2,7 @@ use std::io;
 
 use dyn_clone::DynClone;
 
-use crate::domain::entities::poem::Poem;
-use crate::infrastructure::persistence::file_system::poems_loader::PoemsLoader; 
-
+use crate::{domain::entities::poem::Poem, repositories::poems_repository::PoemsRepository};
 pub trait PoemsInFileSystem: DynClone {
     fn get_all(&self) -> Vec<Poem>;
     fn get_by_id(&self, id: &str) -> Result<Poem, io::Error>;
@@ -15,7 +13,7 @@ pub trait PoemsInFileSystem: DynClone {
 dyn_clone::clone_trait_object!(PoemsInFileSystem);
 
 #[derive(Clone)]
-pub struct TPoemsInFileSystem(pub Box<dyn PoemsLoader>);
+pub struct TPoemsInFileSystem(pub Box<dyn PoemsRepository>);
 
 impl PoemsInFileSystem for TPoemsInFileSystem {
     fn get_all(&self) -> Vec<Poem> {
